@@ -13,6 +13,7 @@
       quanto_options.originY = 0;
       quanto_options.originZ = -5;
       quanto_options.scale = 1;
+      quanto_theory = './qderive-zoology/all.qtheory'
     </script>
      <script>
         window.onload = function () {
@@ -23,7 +24,7 @@
               katex.render(tex, el);
             }
           })
-          convertD3('./qderive-zoology/all.qtheory')
+          convertD3()
         }
       </script>
   </head>
@@ -31,7 +32,7 @@
     <a-scene id="scene">
       <a-sky color="#ECECEC"></a-sky>
       <a-entity camera look-controls wasd-controls position="0 1.6 0" acceleration="100"></a-entity>
-      <div class="qgraph node" data-src="pattern2"></div>
+      <div class="qderive" data-src="demo-simp"></div>
     </a-scene>
   </body>
 </html>

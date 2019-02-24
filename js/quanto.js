@@ -209,9 +209,10 @@ function drawGraph(trans, thy, graph, svg, inserted, removed) {
         break;
       case "rectangle":
         nd = svg.append("a-box")
-        .attr("height","0.4")
-        .attr("width","0.4")
-        .attr("depth","0.4")
+          .attr("height", "0.4")
+          .attr("width", "0.4")
+          .attr("depth", "0.4")
+          .attr("quanto", true)
         break;
     }
 
@@ -263,8 +264,7 @@ function addGraph(thy, graph, div, inserted, removed) {
   trans.originX = width / 2 - trans.scaleToScreen(bbox.midX);
   trans.originY = height / 2 + trans.scaleToScreen(bbox.midY);
 
-  var aframe = d3.select("#scene")
-  drawGraph(trans, thy, graph, aframe, inserted, removed);
+  drawGraph(trans, thy, graph, div, inserted, removed);
 }
 
 // var width = 1000,
@@ -277,7 +277,8 @@ function addGraph(thy, graph, div, inserted, removed) {
 //     .linkDistance(30)
 //     .size([width, height]);
 
-function convertD3(theory) {
+function convertD3() {
+  var theory = quanto_theory
   d3.json(theory, function (errorThy, thyJson) {
     var thyName = d3.select("meta[name=quanto-project]").attr("content");
     var thy = new Theory(thyName, thyJson);
@@ -334,64 +335,21 @@ function convertD3(theory) {
           });
           console.log(maxHeight);
           var trans = new Transformer();
+          trans.ninety = true;
 
-
-          var div1 = div.append("div").attr("class", "qgraph block");
-          var current = 0;
-          div.append("div")
-            .attr("class", "block")
-            .html("&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;");
-          var div2 = div.append("div").attr("class", "qgraph block");
-
-          var info = div.append("div").attr("class", "info");
-          info.append("span")
-            .style("font-weight", "bold")
-            .html("step: ");
-          var stepDisplay = info.append("span")
-            .style("font-style", "italic")
-            .text("1");
-          info.append("span")
-            .style("font-weight", "bold")
-            .html(", rule: ");
-          var ruleDisplay = info.append("span")
-            .style("font-style", "italic")
-            .text("none");
-
-          var controls = div.append("div").attr("class", "controls");
-
-          if (div.attr("data-graph-width") != null) {
-            div1.style("width", div.attr("data-graph-width"));
-            div2.style("width", div.attr("data-graph-width"));
-          } else {
-            div1.style("width", trans.scaleToScreen(maxWidth) + "px");
-            div2.style("width", trans.scaleToScreen(maxWidth) + "px");
-          }
-
-          if (div.attr("data-graph-height") != null) {
-            div1.style("height", div.attr("data-graph-height"));
-            div2.style("height", div.attr("data-graph-height"));
-          } else {
-            div1.style("height", trans.scaleToScreen(maxHeight) + "px");
-            div2.style("height", trans.scaleToScreen(maxHeight) + "px");
-          }
-
-          //div1.style("height", "600px");
-
+          der.steps.forEach(function (step, i) {
+            var b = d3.select("#scene")
+              .append("a-box")
+              .attr("position", `${i} 0 0`)
+              .attr("rotation", `0 90 0`)
+              .attr("material", `opacity: 0`)
+            addGraph(thy, step.graph, b, null, null);
+          })
           function setStep(index) {
             return function () {
-              d3.select(controls.selectAll("a")[0][current + 1])
-                .style("color", null);
-              current = index;
-              d3.select(controls.selectAll("a")[0][current + 1])
-                .style("color", "red");
+              stepDisplay(current + 1)
+              ruleDisplay(der.steps[index].ruleName)
 
-              stepDisplay.text(current + 1);
-              ruleDisplay.text(der.steps[index].ruleName);
-              var lhs = (index == 0) ? der.root : der.steps[index - 1].graph;
-              var rhs = der.steps[index].graph;
-
-              console.log("lhs", lhs.vertices);
-              console.log("rhs", rhs.vertices);
               var removed = d3.set(lhs.vertices.values());
               rhs.vertices.forEach(function (v) {
                 removed.remove(v);
@@ -405,45 +363,18 @@ function convertD3(theory) {
               addGraph(thy, rhs, div2, inserted, null);
             }
           }
-
-
-          controls.append("a")
-            .attr("href", "#")
-            .on("click", function () {
-              if (current > 0) {
-                setStep(current - 1)();
-              }
-            })
-            .append("span")
-            .attr("class", "glyphicon glyphicon-backward")
-            .attr("onclick", "return false;");
-          controls.append("span").html("&nbsp; ");
-
-          for (var i = 0; i < der.steps.length; i++) {
-            controls.append("a")
-              .attr("href", "#")
-              .style("color", null)
-              .on("click", setStep(i))
-              .append("span")
-              .attr("class", "glyphicon glyphicon-stop")
-              .attr("onclick", "return false;");
-            controls.append("span").html("&nbsp; ");
-          }
-
-          controls.append("a")
-            .attr("href", "#")
-            .on("click", function () {
-              if (current < der.steps.length - 1) {
-                setStep(current + 1)();
-              }
-            })
-            .append("span")
-            .attr("class", "glyphicon glyphicon-forward")
-            .attr("onclick", "return false;");
-
-          setStep(current)();
-
         });
       });
   });
+
+}
+
+
+function redraw() {
+  d3.selectAll("*")[0].forEach(function (s) {
+    if (d3.select(s).attr("quanto")) {
+      d3.select(s).remove()
+    }
+  })
+  convertD3()
 }
