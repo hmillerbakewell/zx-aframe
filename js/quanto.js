@@ -340,9 +340,10 @@ function convertD3() {
           der.steps.forEach(function (step, i) {
             var b = d3.select("#scene")
               .append("a-box")
-              .attr("position", `${i} 0 0`)
+              .attr("position", `${2*i} 0 0`)
               .attr("rotation", `0 90 0`)
               .attr("material", `opacity: 0`)
+
             addGraph(thy, step.graph, b, null, null);
           })
           function setStep(index) {
@@ -377,4 +378,13 @@ function redraw() {
     }
   })
   convertD3()
+}
+
+
+function cameraShift() {
+  d3.selectAll("a-entity")[0].forEach(function (s) {
+    if (d3.select(s).attr("camera") !== null) {
+      d3.select(s).attr("position", `${2*derivation_position} 0 3`)
+    }
+  })
 }
