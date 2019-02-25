@@ -200,8 +200,8 @@ function drawGraph(trans, thy, graph, svg, inserted, removed) {
     var nd;
     var c = trans.toScreen(v.annotation.coord);
 
-    console.log(k)
-    console.log(v)
+    //console.log(k)
+    //console.log(v)
     switch (thy.shape(v)) {
       case "circle":
         nd = svg.append("a-sphere")
@@ -333,7 +333,7 @@ function convertD3() {
             maxWidth = Math.max(maxWidth, bb.width);
             maxHeight = Math.max(maxHeight, bb.height);
           });
-          console.log(maxHeight);
+          // console.log(maxHeight);
           var trans = new Transformer();
           trans.ninety = true;
 
